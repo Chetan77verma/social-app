@@ -8,34 +8,28 @@ admin.initializeApp({
    databaseURL: "https://social-app-9bee3.firebaseio.com"
 });
 
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-exports.helloWorld = functions.https.onRequest((request, response) => {
-   functions.logger.info("Hello logs!", { structuredData: true });
-   response.send("Hello World!");
-});
+const express = require('express');
+const app = express();
 
-exports.getScreams = functions.https.onRequest((req, res) => {
-   admin.firestore().collection('screams').get().then((data) => {
+app.get('/screams', (req, res) => { 
+   admin.firestore().collection('screams').orderBy('createAt','desc').get().then((data) => {
       let screams = [];
       data.forEach(doc => {
-         screams.push(doc.data())
+         screams.push({
+            screamdId: doc.id,
+            ...doc.data()
+         })
       });
       return res.json(screams);
    }).catch(err => console.error(err))
-});
+})
 
-exports.createScream = functions.https.onRequest((req, res) => {
-   if (req.method !== 'POST') {
-      return res.status(400).json({ error: "Method Not Allowed !" })
-   }
+app.post('/scream',(req, res) => {
    const newScream = {
       body: req.body.body,
       userHandle: req.body.userHandle,
-      createAt: admin.firestore.Timestamp.fromDate(new Date())
+      createAt: new Date().toISOString()
    }
-
    admin
       .firestore()
       .collection('screams')
@@ -48,3 +42,5 @@ exports.createScream = functions.https.onRequest((req, res) => {
          console.error(err)
       })
 });
+
+exports.api = functions.https.onRequest(app)

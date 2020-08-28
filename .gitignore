@@ -52,6 +52,7 @@ node_modules/
 
 #credentials
 functions/social-app-9bee3-firebase-adminsdk-ckdj6-362488a62c.json
+functions/firebase-client-app-config.json
 
 # Optional eslint cache
 .eslintcache
